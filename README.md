@@ -1,0 +1,2 @@
+# nomadcoin
+making the Nomadcoin
