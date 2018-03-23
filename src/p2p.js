@@ -68,15 +68,26 @@ const handleSocketMessages = ws => {
         console.log(message);
         switch(message.type) {
             case GET_LATEST:
-                sendMessage(ws, getLastBlock());
+                sendMessage(ws, responseLatest());
                 break;
-
+            case BLOCKCHAIN_RESPONSE:
+                const receivedBlocks = message.data;
+                if(receivedBlocks === null){
+                    break;
+                }
+                handleBlockchainResponse(receivedBlocks);
+                break;    
         }
     });
 };
 
+const handleBlockchainResponse = receivedBlocks => {
+
+}
 
 const sendMessage = (ws, message) => ws.send(JSON.stringify(message));
+
+const responseLatest = () => blockchainResponse(getLastBlock());
 
 const handleSocketError = ws => {
     const closeSocketConnection = ws => {
