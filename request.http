@@ -8,6 +8,13 @@ Content-Type: application/json
     "data": "Second block bay!!"
 }
 
+###
+POST http://localhost:3000/blocks
+Content-Type: application/json
+
+{
+    "data": "Third block bay!!"
+}
 
 ###
 POST http://localhost:3000/peers

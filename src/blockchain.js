@@ -23,7 +23,7 @@ const genesisBlock = new Block(
 let blockchain = [genesisBlock];
 
 //마지막 블럭을 가져온다.
-const getLastBlock = () => blockchain[blockchain.length - 1];
+const getNewestBlock = () => blockchain[blockchain.length - 1];
 
 //시간을 가져온다. 
 const getTimestamp = () => new Date().getTime() / 1000;
@@ -39,7 +39,7 @@ const createHash = (index, previousHash, timestamp, data) =>
 
 //새로운 블럭을 만든다. 
 const createNewBlock = data => {
-  const previousBlock = getLastBlock(); //이전블럭 = 생선된 마지막 블럭
+  const previousBlock = getNewestBlock(); //이전블럭 = 생선된 마지막 블럭
   const newBlockIndex = previousBlock.index + 1; //이전 블럭 index + 1
   const newTimestamp = getTimestamp(); //시간
   const newHash = createHash( 
@@ -63,8 +63,8 @@ const createNewBlock = data => {
 const getBlocksHash = block =>
   createHash(block.index, block.previousHash, block.timestamp, block.data);
 
-const isNewBlockValid = (candidateBlock, latestBlock) => {  
-  if (!isNewStructureValid(candidateBlock)) {//새로운 구조인지 체크
+const isBlockValid = (candidateBlock, latestBlock) => {  
+  if (!isBlockStructureValid(candidateBlock)) {//새로운 구조인지 체크
     console.log("The candidate block structure is not valid");
     return false;
   } else if (latestBlock.index + 1 !== candidateBlock.index) { 
@@ -85,7 +85,7 @@ const isNewBlockValid = (candidateBlock, latestBlock) => {
   return true;
 };
 
-const isNewStructureValid = block => {
+const isBlockStructureValid = block => {
   return (
     typeof block.index === "number" &&
     typeof block.hash === "string" &&
@@ -108,7 +108,7 @@ const isChainValid = candidateChain => {
   }
   for (let i = 1; i < candidateChain.length; i++) {
     //다음 블럭이 이전 블럭의 새로운 블럭이 맞는 지 체크
-    if (!isNewBlockValid(candidateChain[i], candidateChain[i - 1])) {
+    if (!isBlockValid(candidateChain[i], candidateChain[i - 1])) {
       return false;
     }
   }
@@ -131,7 +131,7 @@ const replaceChain = candidateChain => {
 //체인에 블럭을 추가
 const addBlockToChain = candidateBlock => {
   //새로운 블럭이 맞는지 유호성 체크 , 마지막 블럭을 가져오고
-  if (isNewBlockValid(candidateBlock, getLastBlock())) {
+  if (isBlockValid(candidateBlock, getNewestBlock())) {
     //블럭을 체인에 푸시한다. 
     blockchain.push(candidateBlock);
     return true;
@@ -141,7 +141,10 @@ const addBlockToChain = candidateBlock => {
 };
 
 module.exports = {
-  getLastBlock,
+  getNewestBlock,
   getBlockchain,
-  createNewBlock
+  createNewBlock,
+  isBlockStructureValid,
+  addBlockToChain,
+  replaceChain
 };
