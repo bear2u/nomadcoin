@@ -43,9 +43,13 @@ const startP2PServer = server => {
 };
 
 const initSocketConnection = ws => {
+    //소켓에 푸시
     sockets.push(ws);
+    //소켓 메세지를 핸들링 한다. 
     handleSocketMessages(ws);
+    //소켓 에러를 핸들링 한다. 
     handleSocketError(ws);
+    //마지막 온
     sendMessage(ws, getLatest());
 };
 
@@ -100,8 +104,10 @@ const handleSocketError = ws => {
 }
 
 const connectToPeers = newPeer => {
+    //웹 소켓을 연다. 
     const ws = new WebSockets(newPeer);
     ws.on("open", () => {
+        //처음 열렸을때 초기화 진행
         initSocketConnection(ws);
     });
 }
