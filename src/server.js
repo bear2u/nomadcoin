@@ -8,8 +8,6 @@ const express = require("express"),
 const { getBlockchain, createNewBlock } = Blockchain;
 const { startP2PServer, connectToPeers } = P2P;
 
-console.log(process.platform);
-
 const PORT = process.env.HTTP_PORT || 3000;
 
 const app = express();

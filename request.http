@@ -8,12 +8,20 @@ Content-Type: application/json
     "data": "Second block bay!!"
 }
 
-###
+### 3번째 블럭 추가
 POST http://localhost:3000/blocks
 Content-Type: application/json
 
 {
     "data": "Third block bay!!"
+}
+
+### 4번째 블럭 추가
+POST http://localhost:3000/blocks
+Content-Type: application/json
+
+{
+    "data": "Force block bay!!"
 }
 
 ###
