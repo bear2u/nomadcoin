@@ -22,7 +22,7 @@ const genesisBlock = new Block(
   0,
   "2C4CEB90344F20CC4C77D626247AED3ED530C1AEE3E6E85AD494498B17414CAC", //createH
   null,
-  1520312194926,
+  1522015307,
   "This is the genesis!!",
   0,
   0
@@ -35,7 +35,7 @@ let blockchain = [genesisBlock];
 const getNewestBlock = () => blockchain[blockchain.length - 1];
 
 //시간을 가져온다.
-const getTimestamp = () => new Date().getTime() / 1000;
+const getTimestamp = () => Math.round(new Date().getTime() / 1000); //반올림 올림
 
 //블록체인을 가져온다.
 const getBlockchain = () => blockchain;
@@ -48,13 +48,13 @@ const createHash = (index, previousHash, timestamp, data, difficulty, nonce) =>
 
 //새로운 블럭을 만든다.
 const createNewBlock = data => {
-  const previousBlock = getNewestBlock(); //이전블럭 = 생선된 마지막 블럭
-  const newBlockIndex = previousBlock.index + 1; //이전 블럭 index + 1
+  const oldBlock = getNewestBlock(); //이전블럭 = 생선된 마지막 블럭
+  const newBlockIndex = oldBlock.index + 1; //이전 블럭 index + 1
   const newTimestamp = getTimestamp(); //시간
   const difficulty = findDifficulty();
   const newBlock = findBlock(
     newBlockIndex,
-    previousBlock.hash,
+    oldBlock.hash,
     newTimestamp,
     data,
     difficulty
@@ -82,10 +82,10 @@ const calculateNewDifficulty = (newestBlock, blockchain) => {
     blockchain[blockchain.length - DIFFICULTY_ADJUSTMENT_INTERVAL];
   const timeExpected =
     BLOCK_GENERATION_INTERVAL * DIFFICULTY_ADJUSTMENT_INTERVAL;
-  const timeTaken = newestBlock.timestamp - lastCalculatedBlock.timestamp;  
-  if(timeTaken < timeExpected / 2) {
+  const timeTaken = newestBlock.timestamp - lastCalculatedBlock.timestamp;
+  if (timeTaken < timeExpected / 2) {
     return lastCalculatedBlock.difficulty + 1;
-  } else if(timeTaken > timeExpected * 2) {
+  } else if (timeTaken > timeExpected * 2) {
     return lastCalculatedBlock.difficulty - 1;
   } else {
     return lastCalculatedBlock.difficulty;
@@ -136,6 +136,15 @@ const getBlocksHash = block =>
     block.nonce
   );
 
+//난이도를 조절하기 위해 타임스탬프를 조절하는 걸 막는다.
+const isTimeStampValid = (newBlock, oldBlock) => {
+  return (
+    //예전 시간에서 1분을 뺀 값이 새로운 시간보다 작고
+    oldBlock.timestamp - 60 < newBlock.timestamp &&
+    newBlock.timestamp - 60 < getTimestamp()
+  );
+};
+
 const isBlockValid = (candidateBlock, latestBlock) => {
   if (!isBlockStructureValid(candidateBlock)) {
     //새로운 구조인지 체크
@@ -154,6 +163,9 @@ const isBlockValid = (candidateBlock, latestBlock) => {
   } else if (getBlocksHash(candidateBlock) !== candidateBlock.hash) {
     //주어진 블럭해쉬가 블럭의 해쉬와 일치 하지 않을 경우
     console.log("The hash of this block is invalid");
+    return false;
+  } else if (!isTimeStampValid(candidateBlock, latestBlock)) {
+    console.log("The timestamp of this block is dogy");
     return false;
   }
   return true;
@@ -188,12 +200,19 @@ const isChainValid = candidateChain => {
   }
   return true;
 };
+
+const sumDifficulty = anyBlockchain =>
+  anyBlockchain
+    .map(block => block.difficulty)
+    .map(difficulty => Math.pow(2, difficulty))
+    .reduce((a,b) => a + b)
+
 //체인을 바꾸는 함수
 const replaceChain = candidateChain => {
   if (
     //체인이 맞는 지 체크
     isChainValid(candidateChain) &&
-    candidateChain.length > getBlockchain().length
+    sumDifficulty(candidateChain) > sumDifficulty(getBlockchain())
   ) {
     blockchain = candidateChain;
     return true;
